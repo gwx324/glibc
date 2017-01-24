@@ -38,7 +38,7 @@ ENTRY (__syscall_cancel_arch)
 	.globl __syscall_cancel_arch_start
 __syscall_cancel_arch_start:
 
-	/* if (*cancelhandling & CANCELED_BITMASK)
+	/* if (*cancelhandling & THREAD_CANCELED)
 	     __syscall_do_cancel()  */
 	lduw	[%i0], %g2
 	andcc	%g2, 4, %g0

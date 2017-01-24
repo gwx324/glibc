@@ -207,7 +207,7 @@ sigcancel_handler (int sig, siginfo_t *si, void *ctx)
   extern const char __syscall_cancel_arch_end[1];
 
   if ((pd->cancelstate == PTHREAD_CANCEL_DISABLE)
-      || ((pd->cancelhandling & CANCELED_BITMASK) == 0))
+      || (atomic_load_relaxed (&pd->cancelhandling) & THREAD_CANCELED) == 0)
     return;
 
   sigaddset_cancel (&uc->uc_sigmask);
@@ -222,7 +222,7 @@ sigcancel_handler (int sig, siginfo_t *si, void *ctx)
   if (pd->canceltype == PTHREAD_CANCEL_ASYNCHRONOUS ||
       (pc >= __syscall_cancel_arch_start && pc < __syscall_cancel_arch_end))
     {
-      THREAD_ATOMIC_BIT_SET (self, cancelhandling, EXITING_BIT);
+      atomic_fetch_or_acquire (&self->cancelhandling, THREAD_EXITING);
       THREAD_SETMEM (self, result, PTHREAD_CANCELED);
 
       /* __pthread_sigmask removes SIGCANCEL from the set.  */
